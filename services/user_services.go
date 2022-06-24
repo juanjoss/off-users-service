@@ -1,7 +1,6 @@
 package services
 
 import (
-	"github.com/juanjoss/off-users-service/model"
 	"github.com/juanjoss/off-users-service/ports"
 )
 
@@ -15,8 +14,8 @@ func NewUserService(repo ports.UserRepository) *UserService {
 	}
 }
 
-func (us *UserService) Register(user *model.User, ssds []*model.SSD) error {
-	err := us.repo.Register(user, ssds)
+func (us *UserService) Register(request ports.RegisterRequest) error {
+	err := us.repo.Register(request)
 	if err != nil {
 		return err
 	}
@@ -24,8 +23,8 @@ func (us *UserService) Register(user *model.User, ssds []*model.SSD) error {
 	return nil
 }
 
-func (us *UserService) AddProductToSSD(ssdId int, barcode string, quantity int) error {
-	err := us.repo.AddProductToSSD(ssdId, barcode, quantity)
+func (us *UserService) AddProductToSSD(request ports.AddProductToSsdRequest) error {
+	err := us.repo.AddProductToSSD(request)
 	if err != nil {
 		return err
 	}
@@ -33,11 +32,11 @@ func (us *UserService) AddProductToSSD(ssdId int, barcode string, quantity int) 
 	return nil
 }
 
-func (us *UserService) RandomSSD() (*model.SSD, error) {
-	ssd, err := us.repo.RandomSSD()
+func (us *UserService) RandomSSD() (ports.GetRandomSsdResponse, error) {
+	response, err := us.repo.RandomSSD()
 	if err != nil {
-		return ssd, err
+		return response, err
 	}
 
-	return ssd, nil
+	return response, nil
 }

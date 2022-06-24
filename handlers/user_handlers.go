@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/juanjoss/off-users-service/model"
 	"github.com/juanjoss/off-users-service/ports"
 )
 
@@ -19,13 +18,8 @@ func NewUserHandlers(userService ports.UserService) *UserHandlers {
 	}
 }
 
-type UserRegistrationRequest struct {
-	User    *model.User  `json:"user"`
-	Devices []*model.SSD `json:"devices"`
-}
-
 func (uh *UserHandlers) Register(w http.ResponseWriter, r *http.Request) {
-	var request UserRegistrationRequest
+	var request ports.RegisterRequest
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -38,7 +32,7 @@ func (uh *UserHandlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = uh.userService.Register(request.User, request.Devices)
+	err = uh.userService.Register(request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -49,29 +43,21 @@ func (uh *UserHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(http.StatusOK)
 }
 
-type AddProductToUserSSDRequest struct {
-	SsdId    int    `json:"ssd_id"`
-	Barcode  string `json:"barcode"`
-	Quantity int    `json:"n_products"`
-}
-
 func (uh *UserHandlers) AddProductToSSD(w http.ResponseWriter, r *http.Request) {
-	var request AddProductToUserSSDRequest
+	var request ports.AddProductToSsdRequest
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if err := json.Unmarshal(body, &request); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = uh.userService.AddProductToSSD(request.SsdId, request.Barcode, request.Quantity)
+	err = uh.userService.AddProductToSSD(request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -83,14 +69,13 @@ func (uh *UserHandlers) AddProductToSSD(w http.ResponseWriter, r *http.Request) 
 }
 
 func (uh *UserHandlers) RandomSSD(w http.ResponseWriter, r *http.Request) {
-	ssd, err := uh.userService.RandomSSD()
+	response, err := uh.userService.RandomSSD()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(ssd)
+	json.NewEncoder(w).Encode(response)
 }

@@ -1,6 +1,8 @@
 package docs
 
-import "github.com/juanjoss/off-users-service/handlers"
+import (
+	"github.com/juanjoss/off-users-service/ports"
+)
 
 // swagger:route POST /addProductToSSD post-requests endpoints
 // Adds a product to a user's device.
@@ -26,5 +28,5 @@ type addProductToSsdErrorResponseWrapper struct {
 type addProductToSsdRequestWrapper struct {
 	// Send the user's device id, product barcode and quantity.
 	// in:body
-	Body handlers.AddProductToUserSSDRequest
+	Body ports.AddProductToSsdRequest
 }

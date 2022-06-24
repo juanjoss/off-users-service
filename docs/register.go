@@ -1,6 +1,8 @@
 package docs
 
-import "github.com/juanjoss/off-users-service/handlers"
+import (
+	"github.com/juanjoss/off-users-service/ports"
+)
 
 // swagger:route POST /register post-requests endpoints
 // Register adds a user and its devices.
@@ -26,5 +28,5 @@ type registerErrorResponseWrapper struct {
 type registerRequestWrapper struct {
 	// Send user data as an object and devices as an array of ssd objects.
 	// in:body
-	Body handlers.UserRegistrationRequest
+	Body ports.RegisterRequest
 }

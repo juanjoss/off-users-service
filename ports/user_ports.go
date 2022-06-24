@@ -6,16 +6,20 @@ import (
 	"github.com/juanjoss/off-users-service/model"
 )
 
+/*
+	Interfaces
+*/
+
 type UserRepository interface {
-	Register(*model.User, []*model.SSD) error
-	AddProductToSSD(ssdId int, barcode string, quantity int) error
-	RandomSSD() (*model.SSD, error)
+	Register(RegisterRequest) error
+	AddProductToSSD(AddProductToSsdRequest) error
+	RandomSSD() (GetRandomSsdResponse, error)
 }
 
 type UserService interface {
-	Register(*model.User, []*model.SSD) error
-	AddProductToSSD(ssdId int, barcode string, quantity int) error
-	RandomSSD() (*model.SSD, error)
+	Register(RegisterRequest) error
+	AddProductToSSD(AddProductToSsdRequest) error
+	RandomSSD() (GetRandomSsdResponse, error)
 }
 
 type UserHandlers interface {
@@ -23,3 +27,20 @@ type UserHandlers interface {
 	AddProductToSSD(w http.ResponseWriter, r *http.Request)
 	RandomSSD(w http.ResponseWriter, r *http.Request)
 }
+
+/*
+	Service models
+*/
+
+type RegisterRequest struct {
+	User *model.User  `json:"user"`
+	SSDs []*model.SSD `json:"devices"`
+}
+
+type AddProductToSsdRequest struct {
+	SsdId    int    `json:"ssd_id"`
+	Barcode  string `json:"barcode"`
+	Quantity int    `json:"quantity"`
+}
+
+type GetRandomSsdResponse model.SSD

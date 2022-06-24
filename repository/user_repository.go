@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/juanjoss/off-users-service/model"
+	"github.com/juanjoss/off-users-service/ports"
 	_ "github.com/lib/pq"
 )
 
@@ -43,22 +43,23 @@ func NewUserRepository() *UserRepository {
 /*
 	Inserts the new user and its ssds.
 */
-func (ur *UserRepository) Register(user *model.User, ssds []*model.SSD) error {
+func (ur *UserRepository) Register(request ports.RegisterRequest) error {
 	var id int
+
 	row := ur.db.QueryRow(
 		`INSERT INTO users (first_name, last_name, email, password) 
 		VALUES ($1, $2, $3, $4)
 		RETURNING id`,
-		user.FirstName,
-		user.LastName,
-		user.Email,
-		user.Password,
+		request.User.FirstName,
+		request.User.LastName,
+		request.User.Email,
+		request.User.Password,
 	)
 	if err := row.Scan(&id); err != nil {
 		return err
 	}
 
-	for _, ssd := range ssds {
+	for _, ssd := range request.SSDs {
 		ssd.UserId = id
 		_, err := ur.db.NamedExec(
 			`INSERT INTO ssds (user_id, mac_address)
@@ -76,12 +77,12 @@ func (ur *UserRepository) Register(user *model.User, ssds []*model.SSD) error {
 /*
 	Inserts a product and its quantity into a ssd. Upserts for existing records.
 */
-func (ur *UserRepository) AddProductToSSD(ssdId int, barcode string, quantity int) error {
+func (ur *UserRepository) AddProductToSSD(request ports.AddProductToSsdRequest) error {
 	_, err := ur.db.Exec(
 		`INSERT INTO product_ssds (ssd_id, barcode, quantity) 
 		VALUES ($1, $2, $3)
 		ON CONFLICT DO NOTHING`,
-		ssdId, barcode, quantity,
+		request.SsdId, request.Barcode, request.Quantity,
 	)
 	if err != nil {
 		return err
@@ -93,25 +94,13 @@ func (ur *UserRepository) AddProductToSSD(ssdId int, barcode string, quantity in
 /*
 	Returns a random ssd.
 */
-func (ur *UserRepository) RandomSSD() (*model.SSD, error) {
-	ssd := &model.SSD{}
+func (ur *UserRepository) RandomSSD() (ports.GetRandomSsdResponse, error) {
+	response := ports.GetRandomSsdResponse{}
 
-	rows, err := ur.db.Queryx(
-		`SELECT * FROM ssds ORDER BY RANDOM() LIMIT 1`,
-	)
+	err := ur.db.Get(&response, `SELECT * FROM ssds ORDER BY RANDOM() LIMIT 1`)
 	if err != nil {
-		return ssd, err
+		return response, err
 	}
 
-	for rows.Next() {
-		err = rows.StructScan(ssd)
-		if err != nil {
-			return ssd, err
-		}
-	}
-	if err = rows.Err(); err != nil {
-		return ssd, err
-	}
-
-	return ssd, nil
+	return response, nil
 }
