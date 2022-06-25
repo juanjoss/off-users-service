@@ -3,7 +3,7 @@
 // Documentation for the users service.
 //
 //     Schemes: http
-//     BasePath: /api
+//     BasePath: /api/users
 //     Version: 1.0.0
 //     Host: localhost:3002
 //
