@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/juanjoss/off-users-service/ports"
@@ -21,13 +20,14 @@ func NewUserHandlers(userService ports.UserService) *UserHandlers {
 func (uh *UserHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	var request ports.RegisterRequest
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// body, err := ioutil.ReadAll(r.Body)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
-	if err := json.Unmarshal(body, &request); err != nil {
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -46,13 +46,14 @@ func (uh *UserHandlers) Register(w http.ResponseWriter, r *http.Request) {
 func (uh *UserHandlers) AddProductToSSD(w http.ResponseWriter, r *http.Request) {
 	var request ports.AddProductToSsdRequest
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// body, err := ioutil.ReadAll(r.Body)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
-	if err := json.Unmarshal(body, &request); err != nil {
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
